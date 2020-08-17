@@ -154,6 +154,46 @@ class Autocomplete extends Component {
     }
   }
 
+  renderTextInput() {
+    const {
+      renderTextInput,
+      inputStyle,
+      placeholder,
+      placeholderColor,
+      disableFullscreenUI,
+      inputValue,
+      autoCorrect,
+      keyboardType,
+      scrollToInput,
+    } = this.props;
+
+    const props = {
+      ref: (ref) => {
+        this.container = ref;
+      },
+      onBlur: (event) => this.handleBlur(event),
+      style: [styles.input, inputStyle],
+      placeholder,
+      placeholderTextColor: placeholderColor || theme.textSecondary,
+      disableFullscreenUI,
+      value: inputValue,
+      autoCorrect,
+      keyboardType,
+      onChangeText: (text) => this.handleInputChange(text),
+      onFocus: (event) => {
+        if (scrollToInput) {
+          scrollToInput(findNodeHandle(event.target));
+        }
+      }
+    };
+
+    if (renderTextInput) {
+      return renderTextInput(props);
+    }
+
+    return <TextInput {...props}/>;
+  }
+
   render() {
     const {inputValue, items, loading, filteredItems} = this.state;
     const {
@@ -171,6 +211,7 @@ class Autocomplete extends Component {
       placeholderColor,
       data,
       disableFullscreenUI,
+      renderTextInput,
       ...dropdownProps
     } = this.props;
 
@@ -178,25 +219,7 @@ class Autocomplete extends Component {
       <Fragment>
         <View style={[styles.inputContainerStyle, inputContainerStyle]}>
           {renderIcon && renderIcon()}
-          <TextInput
-            ref={ref => {
-              this.container = ref;
-            }}
-            onBlur={event => this.handleBlur(event)}
-            style={[styles.input, inputStyle]}
-            placeholder={placeholder}
-            placeholderTextColor={placeholderColor || theme.textSecondary}
-            disableFullscreenUI={disableFullscreenUI}
-            value={inputValue}
-            autoCorrect={autoCorrect}
-            keyboardType={keyboardType}
-            onChangeText={text => this.handleInputChange(text)}
-            onFocus={event => {
-              if (scrollToInput) {
-                scrollToInput(findNodeHandle(event.target));
-              }
-            }}
-          />
+          {this.renderTextInput()}
           {loading && (
             <ActivityIndicator
               style={[styles.spinner, spinnerStyle]}
@@ -254,6 +277,8 @@ Autocomplete.propTypes = {
   onDropdownShow: func,
   rightTextExtractor: func,
   fetchData: func,
+
+  renderTextInput: func,
 };
 
 export default Autocomplete;
